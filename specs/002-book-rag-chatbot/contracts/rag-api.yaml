@@ -1,0 +1,214 @@
+openapi: 3.0.0
+info:
+  title: RAG Chatbot API
+  description: API for the Retrieval-Augmented Generation chatbot system
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://your-backend-url.com
+    description: Production server
+
+paths:
+  /api/query:
+    post:
+      summary: Query the RAG chatbot
+      description: Send a question to the chatbot and receive an answer based on book content or selected text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Successful response from the chatbot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/index:
+    post:
+      summary: Index book content
+      description: Index book chapters for RAG retrieval
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IndexRequest'
+      responses:
+        '200':
+          description: Successfully indexed content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexResponse'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/health:
+    get:
+      summary: Health check
+      description: Check if the API is running and healthy
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-12-06T10:00:00Z"
+
+components:
+  schemas:
+    QueryRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: The user's question
+          example: "What are the key components of a RAG system?"
+        sessionId:
+          type: string
+          description: Optional session identifier to maintain conversation context
+          example: "session-12345"
+        useSelectedTextOnly:
+          type: boolean
+          description: Whether to use only the selected text as context
+          default: false
+        selectedText:
+          type: string
+          description: Text selected by the user (used when useSelectedTextOnly is true)
+          example: "The RAG system consists of an encoder, a retriever, and a generator component."
+
+    QueryResponse:
+      type: object
+      required:
+        - response
+        - sessionId
+      properties:
+        response:
+          type: string
+          description: The chatbot's answer to the question
+          example: "A RAG (Retrieval-Augmented Generation) system consists of three main components: an encoder that converts documents to embeddings, a retriever that finds relevant documents based on user queries, and a generator that produces the final response using both the query and retrieved context."
+        sources:
+          type: array
+          items:
+            type: string
+          description: List of sources used to generate the response
+          example: ["Chapter 4: RAG Fundamentals", "Section 2.3: Architecture Overview"]
+        sessionId:
+          type: string
+          description: Session identifier
+          example: "session-12345"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the response was generated
+          example: "2025-12-06T10:00:00Z"
+
+    IndexRequest:
+      type: object
+      required:
+        - chapters
+      properties:
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chapter'
+          description: List of book chapters to index
+        forceReindex:
+          type: boolean
+          description: Whether to reindex existing content
+          default: false
+
+    Chapter:
+      type: object
+      required:
+        - id
+        - title
+        - content
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the chapter
+          example: "ch-001"
+        title:
+          type: string
+          description: Title of the chapter
+          example: "Introduction to RAG Systems"
+        content:
+          type: string
+          description: Full content of the chapter in plain text
+          example: "A Retrieval-Augmented Generation (RAG) system combines..."
+
+    IndexResponse:
+      type: object
+      required:
+        - status
+        - indexedCount
+      properties:
+        status:
+          type: string
+          description: Status of the indexing operation
+          example: "success"
+        indexedCount:
+          type: integer
+          description: Number of content chunks indexed
+          example: 42
+        message:
+          type: string
+          description: Additional information about the operation
+          example: "Successfully indexed 42 content chunks"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "invalid_input"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Query parameter is required"
+        details:
+          type: object
+          description: Additional error details (optional)
+          example: {"field": "query", "reason": "cannot be empty"}
