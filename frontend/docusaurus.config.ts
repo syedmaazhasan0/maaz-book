@@ -22,7 +22,7 @@ const config: Config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'syedmaazhasan0', // Replace with your GitHub username
-  projectName: 'my-research-paper', // Replace with your repo name
+  projectName: 'maaz-book', // Replace with your repo name
 
   onBrokenLinks: 'throw',
 
@@ -43,7 +43,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/syedmaazhasan0/my-research-paper',
+            'https://github.com/syedmaazhasan0/maaz-book',
         },
         blog: {
           showReadingTime: true,
@@ -54,7 +54,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/syedmaazhasan0/my-research-paper',
+            'https://github.com/syedmaazhasan0/maaz-book',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -69,7 +69,7 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/logo.svg',
     colorMode: {
       respectPrefersColorScheme: true,
     },
@@ -88,7 +88,7 @@ const config: Config = {
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/syedmaazhasan0/my-research-paper',
+          href: 'https://github.com/syedmaazhasan0/maaz-book',
           label: 'GitHub',
           position: 'right',
         },
@@ -110,12 +110,8 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
               label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
+              href: 'https://discord.com/users/maaz_18813',
             },
             {
               label: 'X',
@@ -132,7 +128,7 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/syedmaazhasan0/my-research-paper',
+              href: 'https://github.com/syedmaazhasan0/maaz-book',
             },
           ],
         },

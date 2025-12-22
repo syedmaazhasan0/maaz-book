@@ -3,9 +3,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 import logging
 import datetime
-from backend.src.services.qdrant_service import qdrant_service
-from backend.src.services.embedding_service import embedding_service
-from backend.src.utils.chunker import chunker
+from src.services.qdrant_service import qdrant_service
+from src.services.embedding_service import embedding_service
+from src.utils.chunker import chunker
 
 router = APIRouter()
 

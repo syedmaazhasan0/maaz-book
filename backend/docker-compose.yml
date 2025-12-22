@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  app:
+  backend:
     build: .
     ports:
       - "8000:8000"
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
       - QDRANT_URL=${QDRANT_URL}
       - QDRANT_API_KEY=${QDRANT_API_KEY}
-      - QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME}
-    env_file:
-      - .env
-    restart: unless-stopped
+      - NEON_DB_URL=${NEON_DB_URL}
+    volumes:
+      - .:/app
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload

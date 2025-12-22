@@ -3,11 +3,12 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import logging
 import datetime
-from backend.src.services.rag_service import rag_service
-from backend.src.services.embedding_service import embedding_service
-from backend.src.services.qdrant_service import qdrant_service
+from src.services.rag_service import RAGService
+from src.services.embedding_service import embedding_service
+from src.services.qdrant_service import qdrant_service
 
 router = APIRouter()
+rag_service = RAGService()
 
 # Request and response models
 class QueryRequest(BaseModel):
@@ -46,16 +47,21 @@ async def query_chatbot(request: QueryRequest):
         # Process the query using RAG service
         if request.useSelectedTextOnly and request.selectedText:
             # Use selected text only mode
-            response_text = await rag_service.process_query_with_selected_text(
-                request.query,
-                request.selectedText
+            from src.models.query_models import QueryRequest as InternalQueryRequest
+            internal_request = InternalQueryRequest(
+                question=request.query,
+                selected_text=request.selectedText
             )
-            sources = ["Selected text"]
+            result = rag_service.query_selected_text(internal_request)
+            response_text = result.answer
+            sources = result.sources
         else:
             # Use standard RAG flow
-            result = await rag_service.process_full_rag_query(request.query)
-            response_text = result["response"]
-            sources = result.get("sources", ["Retrieved content"])
+            from src.models.query_models import QueryRequest as InternalQueryRequest
+            internal_request = InternalQueryRequest(question=request.query)
+            result = rag_service.query_full_book(internal_request)
+            response_text = result.answer
+            sources = result.sources
 
         session_id = request.sessionId or f"session-{datetime.datetime.now().timestamp()}"
 

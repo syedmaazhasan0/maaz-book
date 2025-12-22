@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "assistant": {
+    "name": "Qwen Code",
+    "capabilities": [
+      "code_generation",
+      "code_refactoring",
+      "documentation",
+      "testing",
+      "debugging"
+    ]
+  },
+  "project_context": {
+    "type": "research_paper",
+    "language": "mixed",
+    "frameworks": []
+  }
+}

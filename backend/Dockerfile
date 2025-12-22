@@ -14,7 +14,7 @@ RUN apt-get update \
         build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project requirements
+# Copy requirements file
 COPY requirements.txt .
 
 # Install Python dependencies

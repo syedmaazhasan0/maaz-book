@@ -26,7 +26,21 @@
       "Bash(npm run)",
       "Bash(npx docusaurus build)",
       "Bash(rm -rf node_modules)",
-      "Bash(./node_modules/.bin/docusaurus --version)"
+      "Bash(./node_modules/.bin/docusaurus --version)",
+      "Bash(python -m uvicorn:*)",
+      "Bash(\"C:\\\\Users\\\\Maaz Hassan\\\\Desktop\\\\my-research-paper\\\\.venv\\\\Scripts\\\\pip.exe\" install uvicorn[standard] fastapi)",
+      "Bash(pip install:*)",
+      "Bash(/c/Users/Maaz Hassan/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0/LocalCache/local-packages/python311/Scripts/python -m uvicorn:*)",
+      "Bash(python:*)",
+      "Bash(npm start)",
+      "Bash(taskkill:*)",
+      "Bash(PORT=3001 npm start:*)",
+      "Bash(curl:*)",
+      "Bash(npm run serve:*)",
+      "Bash(PORT=3001 npm run serve:*)",
+      "Bash(findstr:*)",
+      "Bash(find:*)",
+      "Bash(.venv/Scripts/python.exe:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,41 +1,48 @@
-from fastapi import FastAPI
+"""
+Main application entry point for the Integrated RAG Chatbot API.
+"""
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-import os
+from fastapi.responses import JSONResponse
+from src.api.query_api import router as query_router
+import traceback
 
-# Load environment variables
-load_dotenv()
 
-# Create FastAPI app instance
-app = FastAPI(
-    title="RAG Chatbot API",
-    description="API for the Retrieval-Augmented Generation chatbot system",
-    version="1.0.0"
-)
+# Initialize the FastAPI application
+app = FastAPI(title="Integrated RAG Chatbot API")
 
 # Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+try:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*","http://localhost:3000","http://maaz-book.vercel.app"],
+        allow_credentials=True,
+        allow_methods=["Get", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["X-API-KEY", "Content-Type","Authorization"],
+    )
+except Exception as e:
+    print(f"Error adding middleware: {e}")
 
-# Import and include routers
-from api.health import router as health_router
-from api.chat import router as chat_router
-from api.index import router as index_router
+# Include the query API router
+app.include_router(query_router, prefix="", tags=["query"])
 
-app.include_router(health_router, prefix="/api", tags=["health"])
-app.include_router(chat_router, prefix="/api", tags=["chat"])
-app.include_router(index_router, prefix="/api", tags=["index"])
+
+# Removed custom exception handler to use FastAPI defaults
+# v3
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "message": "API is running"}
+
+
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {"message": "Physical AI and Humanoid Robotics Chatbot API"}
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        "backend.src.main:app",
-        host=os.getenv("BACKEND_HOST", "0.0.0.0"),
-        port=int(os.getenv("BACKEND_PORT", 8000)),
-        reload=True
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000)

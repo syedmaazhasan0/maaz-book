@@ -168,6 +168,11 @@
   max-height: 80px;
 }
 
+.chatbot-input:disabled {
+  background-color: #f5f5f5;
+  color: #ccc;
+}
+
 .chatbot-send-button {
   margin-left: 10px;
   padding: 10px 15px;
@@ -185,4 +190,18 @@
 .chatbot-send-button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
+}
+
+.chatbot-error {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.chatbot-error p {
+  margin: 0;
 }

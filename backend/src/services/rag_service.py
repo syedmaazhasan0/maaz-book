@@ -1,120 +1,74 @@
-import os
-from typing import List, Dict, Any
-from dotenv import load_dotenv
-from openai import OpenAI
-from backend.src.services.embedding_service import embedding_service
-from backend.src.services.qdrant_service import qdrant_service
-from backend.src.services.retrieval_service import retrieval_service
-from backend.src.models.chapter import ContentChunk
+from typing import List
+from src.services.retrieval_service import RetrievalService
+from src.services.generation_service import GenerationService
+from src.models.content_models import ContentChunk
+from src.models.query_models import QueryRequest, QueryResponse
 
-# Load environment variables
-load_dotenv()
 
 class RAGService:
-    """
-    Service for implementing Retrieval-Augmented Generation functionality
-    """
-
     def __init__(self):
-        # Initialize OpenAI client with API key from environment
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-    async def generate_response(self, query: str, context: str) -> str:
+        self.retrieval_service = RetrievalService()
+        self.generation_service = GenerationService()
+    
+    def query_full_book(self, request: QueryRequest) -> QueryResponse:
         """
-        Generate a response using OpenAI based on query and context
+        Handle a query against the full book content
         """
-        try:
-            prompt = f"""
-            Context information is below.
-            ---------------------
-            {context}
-            ---------------------
-            Given the context information and not prior knowledge, answer the query.
-            Query: {query}
-            Answer:
-            """
-
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",  # You can also use gpt-4 if available
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that answers questions based on the provided context."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.7
-            )
-
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"Error generating response: {e}")
-            raise
-
-    async def retrieve_context(self, query: str, top_k: int = 5) -> str:
+        # Retrieve relevant chunks based on the question
+        relevant_chunks = self.retrieval_service.retrieve_relevant_chunks(
+            request.question, 
+            top_k=5
+        )
+        
+        # Generate an answer based on the retrieved chunks
+        answer = self.generation_service.generate_answer(
+            request.question, 
+            relevant_chunks
+        )
+        
+        # Extract source IDs from the chunks
+        sources = [chunk.id for chunk in relevant_chunks]
+        
+        return QueryResponse(
+            answer=answer,
+            sources=sources,
+            mode_used="full_book"
+        )
+    
+    def query_selected_text(self, request: QueryRequest) -> QueryResponse:
         """
-        Retrieve relevant context from Qdrant based on the query
+        Handle a query against only the selected text
         """
-        try:
-            # Use the retrieval service to get relevant documents
-            search_results = await retrieval_service.retrieve_relevant_documents(query, top_k)
-
-            # Combine the content from results
-            context_parts = []
-            for result in search_results:
-                context_parts.append(result["content"])
-
-            return "\n\n".join(context_parts)
-        except Exception as e:
-            print(f"Error retrieving context: {e}")
-            raise
-
-    async def process_query_with_selected_text(self, query: str, selected_text: str) -> str:
+        if not request.selected_text:
+            raise ValueError("Selected text is required for selected_text mode")
+        
+        # Create a chunk from the selected text
+        selected_chunks = self.retrieval_service.retrieve_from_selected_text(
+            request.selected_text
+        )
+        
+        # Generate an answer based on the selected text
+        answer = self.generation_service.generate_answer(
+            request.question,
+            selected_chunks
+        )
+        
+        # For selected text mode, we return a special source identifier
+        sources = ["selected_text"]
+        
+        return QueryResponse(
+            answer=answer,
+            sources=sources,
+            mode_used="selected_text"
+        )
+    
+    def process_query(self, request: QueryRequest) -> QueryResponse:
         """
-        Process a query using only the selected text as context
+        Process a query request, choosing between full-book and selected-text modes
         """
-        try:
-            prompt = f"""
-            Using only the following text, answer the question.
-            Text: {selected_text}
-            Question: {query}
-            Answer:
-            """
-
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that answers questions based only on the provided text."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.7
-            )
-
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"Error processing query with selected text: {e}")
-            raise
-
-    async def process_full_rag_query(self, query: str, top_k: int = 5) -> Dict[str, Any]:
-        """
-        Process a full RAG query: retrieve context and generate response
-        """
-        try:
-            # Retrieve context from vector store
-            context = await self.retrieve_context(query, top_k)
-
-            # Generate response using the context
-            response = await self.generate_response(query, context)
-
-            # For now, return a simple structure
-            # In a real implementation, you'd want to return more detailed information
-            return {
-                "response": response,
-                "context_used": context[:200] + "..." if len(context) > 200 else context,  # Truncate for display
-                "sources": ["Retrieved from book content"]  # In a real implementation, this would contain actual sources
-            }
-        except Exception as e:
-            print(f"Error processing full RAG query: {e}")
-            raise
-
-# Global instance
-rag_service = RAGService()
+        if request.selected_text:
+            # Use selected text mode
+            return self.query_selected_text(request)
+        else:
+            # Use full book mode
+            return self.query_full_book(request)

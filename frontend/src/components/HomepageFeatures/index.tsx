@@ -11,32 +11,32 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Comprehensive Coverage',
+    Svg: require('@site/static/img/robot_perception.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Explore 11 comprehensive chapters covering Physical AI fundamentals, perception systems,
+        locomotion, manipulation, learning algorithms, and real-world applications.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Interactive Learning',
+    Svg: require('@site/static/img/robot_learning.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Ask our AI-powered chatbot questions about humanoid robotics, robot platforms like Atlas and ASIMO,
+        and get instant answers from the book content.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Cutting-Edge Topics',
+    Svg: require('@site/static/img/robot_platforms.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Learn about the latest in humanoid robotics including reinforcement learning, sim-to-real transfer,
+        and major platforms from Boston Dynamics, Honda, and Tesla.
       </>
     ),
   },

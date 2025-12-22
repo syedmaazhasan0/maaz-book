@@ -1,44 +1,27 @@
-import openai
-import os
 from typing import List
-from dotenv import load_dotenv
+from src.services.cohere_service import CohereClient
+from src.models.content_models import ContentChunk
 
-# Load environment variables
-load_dotenv()
 
 class EmbeddingService:
-    """
-    Service for generating embeddings using OpenAI API
-    """
-
     def __init__(self):
-        # Set OpenAI API key from environment
-        openai.api_key = os.getenv("OPENAI_API_KEY")
-
-    async def create_embedding(self, text: str) -> List[float]:
+        self.cohere_client = CohereClient()
+    
+    def create_embeddings(self, chunks: List[ContentChunk]) -> List[List[float]]:
         """
-        Create an embedding for the given text
+        Create embeddings for the provided content chunks
         """
-        try:
-            response = openai.Embedding.create(
-                input=text,
-                model="text-embedding-ada-002"
-            )
-            embedding = response['data'][0]['embedding']
-            return embedding
-        except Exception as e:
-            print(f"Error creating embedding: {e}")
-            raise
-
-    async def create_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
-        """
-        Create embeddings for a batch of texts
-        """
-        embeddings = []
-        for text in texts:
-            embedding = await self.create_embedding(text)
-            embeddings.append(embedding)
+        # Extract text content from chunks
+        texts = [chunk.content for chunk in chunks]
+        
+        # Generate embeddings using Cohere
+        embeddings = self.cohere_client.embed_texts(texts)
+        
         return embeddings
-
-# Global instance
-embedding_service = EmbeddingService()
+    
+    def create_single_embedding(self, text: str) -> List[float]:
+        """
+        Create embedding for a single text (used for query embedding)
+        """
+        embeddings = self.cohere_client.embed_texts([text])
+        return embeddings[0]

@@ -1,120 +1,76 @@
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
-from qdrant_client.http.models import PointStruct
-from typing import List, Optional, Dict, Any
-import os
-from dotenv import load_dotenv
-from backend.src.models.chapter import ContentChunk
+from typing import List, Dict, Any
+from src.config import settings
 
-# Load environment variables
-load_dotenv()
 
 class QdrantService:
-    """
-    Service for interacting with Qdrant vector database
-    """
-
     def __init__(self):
-        # Initialize Qdrant client with environment variables
         self.client = QdrantClient(
-            url=os.getenv("QDRANT_URL"),
-            api_key=os.getenv("QDRANT_API_KEY"),
-            prefer_grpc=True  # Use gRPC for better performance
+            url=settings.qdrant_url,
+            api_key=settings.qdrant_api_key,
+            prefer_grpc=False  # Using REST API
         )
-        self.collection_name = os.getenv("QDRANT_COLLECTION_NAME", "book_content")
-
-    def create_collection(self, vector_size: int = 1536):
+        self.collection_name = "book_collection"
+        
+    def create_collection(self, vector_size: int = 1024):
         """
-        Create a collection in Qdrant for storing embeddings
+        Create a Qdrant collection for storing content embeddings
         """
         try:
             # Check if collection already exists
-            collections = self.client.get_collections()
-            collection_names = [collection.name for collection in collections.collections]
-
-            if self.collection_name not in collection_names:
-                self.client.create_collection(
-                    collection_name=self.collection_name,
-                    vectors_config=models.VectorParams(
-                        size=vector_size,
-                        distance=models.Distance.COSINE
-                    )
+            self.client.get_collection(collection_name=self.collection_name)
+            print(f"Collection {self.collection_name} already exists")
+        except:
+            # Create the collection if it doesn't exist
+            self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=models.VectorParams(
+                    size=vector_size,
+                    distance=models.Distance.COSINE
                 )
-                print(f"Collection '{self.collection_name}' created successfully")
-            else:
-                print(f"Collection '{self.collection_name}' already exists")
-        except Exception as e:
-            print(f"Error creating collection: {e}")
-            raise
-
-    async def insert_vectors(self, chunks: List[ContentChunk]):
+            )
+            print(f"Created collection {self.collection_name}")
+    
+    def upsert_vectors(self, vectors: List[Dict[str, Any]]):
         """
-        Insert content chunks with their embeddings into Qdrant
+        Upsert vectors to the collection
+        Each vector dict should have: id, vector, payload
         """
         try:
             points = []
-            for chunk in chunks:
-                point = PointStruct(
-                    id=chunk.id,
-                    vector=chunk.embedding,
-                    payload={
-                        "content": chunk.content,
-                        "chapter_id": chunk.chapterId,
-                        "chunk_index": chunk.chunkIndex,
-                        "metadata": chunk.metadata
-                    }
-                )
-                points.append(point)
-
-            # Upload points to Qdrant
+            for item in vectors:
+                points.append(models.PointStruct(
+                    id=item["id"],
+                    vector=item["vector"],
+                    payload=item["payload"]
+                ))
+            
             self.client.upsert(
                 collection_name=self.collection_name,
                 points=points
             )
-            print(f"Inserted {len(points)} vectors into Qdrant")
         except Exception as e:
-            print(f"Error inserting vectors: {e}")
-            raise
-
-    async def query_vectors(self, query_vector: List[float], top_k: int = 5) -> List[Dict[str, Any]]:
+            raise Exception(f"Error upserting vectors: {str(e)}")
+    
+    def search_similar(self, query_vector: List[float], top_k: int = 5) -> List[Dict[str, Any]]:
         """
-        Query Qdrant for similar vectors
+        Search for similar vectors in the collection
         """
         try:
-            search_result = self.client.search(
+            results = self.client.search(
                 collection_name=self.collection_name,
                 query_vector=query_vector,
-                limit=top_k,
-                with_payload=True
+                limit=top_k
             )
-
-            results = []
-            for hit in search_result:
-                result = {
-                    "id": hit.id,
-                    "content": hit.payload.get("content", ""),
-                    "chapter_id": hit.payload.get("chapter_id", ""),
-                    "chunk_index": hit.payload.get("chunk_index", 0),
-                    "score": hit.score,
-                    "metadata": hit.payload.get("metadata", {})
+            
+            return [
+                {
+                    "id": result.id,
+                    "payload": result.payload,
+                    "score": result.score
                 }
-                results.append(result)
-
-            return results
+                for result in results
+            ]
         except Exception as e:
-            print(f"Error querying vectors: {e}")
-            raise
-
-    async def delete_collection(self):
-        """
-        Delete the collection (useful for reindexing)
-        """
-        try:
-            self.client.delete_collection(self.collection_name)
-            print(f"Collection '{self.collection_name}' deleted")
-        except Exception as e:
-            print(f"Error deleting collection: {e}")
-            raise
-
-# Global instance
-qdrant_service = QdrantService()
+            raise Exception(f"Error searching vectors: {str(e)}")

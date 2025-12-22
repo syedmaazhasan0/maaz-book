@@ -1,6 +1,6 @@
 import re
 from typing import List
-from backend.src.models.chapter import ContentChunk
+from src.models.chapter import ContentChunk
 
 class TextChunker:
     """

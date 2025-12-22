@@ -30,9 +30,9 @@ description: "Task list for AI/Spec-Driven Book Creation + Embedded RAG Chatbot"
 
 - [x] T001 Create project structure per implementation plan with backend/, frontend/, docs/ directories
 - [x] T002 Initialize GitHub repository and connect locally
-- [ ] T003 [P] Install Node.js LTS and Python 3.10+ if not already installed
-- [ ] T004 [P] Install Docusaurus globally using npm
-- [ ] T005 Create Qdrant Cloud account and get API keys
+- [x] T003 [P] Install Node.js LTS and Python 3.10+ if not already installed
+- [x] T004 [P] Install Docusaurus globally using npm
+- [x] T005 Create Qdrant Cloud account and get API keys
 - [x] T006 Create .env.example files for backend and frontend with required environment variables
 
 ---
@@ -48,8 +48,8 @@ description: "Task list for AI/Spec-Driven Book Creation + Embedded RAG Chatbot"
 - [x] T009 [P] Initialize FastAPI project structure in backend/ with requirements.txt
 - [x] T010 [P] Configure basic docusaurus.config.ts with theme and navigation
 - [x] T011 Set up basic FastAPI application in backend/src/main.py with CORS
-- [ ] T012 [P] Install and configure required dependencies for both backend and frontend
-- [ ] T013 Create initial .gitignore with appropriate entries for both projects
+- [x] T012 [P] Install and configure required dependencies for both backend and frontend
+- [x] T013 Create initial .gitignore with appropriate entries for both projects
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
